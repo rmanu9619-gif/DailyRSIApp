@@ -112,7 +112,11 @@ def calculate_rsi(data):
 # -------------------------
 st.title("Stock RSI Dashboard")
 
-st.text("Key: lightgreen(<30), green(<40), red(>70)")
+st.subheader("Key:"
+st.text("lightgreen(<30)")
+st.text("green(<40)")
+st.text("white(40-70)")
+st.text("red(>70)")
 
     
 # Download data (cached)
