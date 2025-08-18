@@ -1,152 +1,147 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
 import yfinance as yf
-import talib
+import pandas as pd
+import time
 
-# =========================
-# PAGE SETUP
-# =========================
-st.set_page_config(page_title="Trading Dashboard", layout="wide")
+# -------------------------
+# Hardcoded list of tickers
+# -------------------------
+tickers = [
 
-tab1, tab2 = st.tabs(["📊 RSI App", "🎲 Monte Carlo Simulator"])
+    "AAL","AAPL","ACHC","ADBE","AEHR","AEP","AMD","AMGN","AMTX","AMZN","ARCB","AVGO",
+    "BECN","BIDU","CAAS","CAKE","CASY","CHNR","CHPT","CMCSA","COST","CPRX","CSCO","CTSH",
+    "CZR","DBX","DJCO","DLTR","ETSY","FIZZ","FTNT","GBCI","GEG","GILD","GMAB","GOGO",
+    "GOOGL","GRPN","HAS","HBIO","HTLD","ILMN","INTC","IOSP","JBLU","KALU","KDP","LE","LQDA",
+    "LULU","LYFT","MANH","MAR","MAT","META","MIDD","MNST","MSEX","MSFT","MTCH","MYGN","NCTY",
+    "NTES","NTIC","NVDA","NXPI","ONB","ORLY","OZK","PCAR","PEP","PTON","PYPL","PZZA","QCOM",
+    "REGN","RGLD","ROCK","RTC","SBUX","SEDG","SEIC","SFIX","SFM","SIRI","SKYW","SOHU","SWBI",
+    "TROW","TSLA","TXN","TXRH","ULTA","URBN","USLM","UTSI","VEON","VRA","VRSK","WBA","WDFC",
+    "WEN","YORW","ABBV","ABT","AEO","AFL","ALL","AMC","AMN","ANET","ANF","APAM","APD","APTV",
+    "ASGN","ASH","AWK","AXP","AZO","BA","BABA","BAC","BAM","BAX","BBW","BBY","BCS","BEN","BILL",
+    "BLK","BMY","BNED","BP","BUD","BURL","BWA","BX","C","CAT","CCJ","CL","CLW","CMG","CNC",
+    "CNI","CP","CPB","CRH","CRM","CTVA","CVS","CVX","CYD","D","DAL","DB","DE","DEO","DFS","DG",
+    "DIS","DLR","DOC","DOW","DXC","EDR","EDU","EL","EMN","ENB","ET","EXR","F","FCN","FCX","FE",
+    "FICO","FL","FMC","FTS","GD","GE","GEO","GIS","GM","GMED","GRMN","GS","GSK","H","HD","HES",
+    "HMC","HOG","HRB","HSY","ICE","IMAX","IQV","IRM","JNJ","JPM","K","KEY","KKR","KMI","KMX",
+    "KO","KWR","L","LAC","LAZ","LCII","LMT","LOW","LUV","LVS","M","MA","MCD","MCK","MCO","MET",
+    "MKC","MOV","MRK","MS","MTB","NCLH","NFG","NGS","NKE","NOC","NOV","NTR","NVO","NVS","OKE",
+    "OPY","ORCL","PBH","PCG","PFE","PG","PKX","PLNT","PLOW","PNC","PRU","PSA","PSX","RBA",
+    "RCI","RF","RTX","SAP","SAVE","SCHW","SJW","SNA","SNOW","SO","SONY","SPOT","SRE","SUN",
+    "SYY","T","TAL","TAP","TCS","TEVA","TGT","THS","TJX","TM","TR","TREX","TRP","TSM","TSN",
+    "TU","TWI","TXT","UA","UBER","UBS","UGI","UL","UNFI","UNH","UPS","V","VEEV","VFC","VZ",
+    "WFC","WH","WHD","WMT","WNC","WSM","X","XOM","XRX","YUM","ZTO"
+]
 
-# =========================
-# RSI APP
-# =========================
-with tab1:
-    st.title("RSI App 📊")
+# -------------------------
+# Wilder RSI function
+# -------------------------
 
-    # Load tickers
-    tickers = pd.read_csv("tickers.csv")["Ticker"].tolist()
+def wilder_rsi(prices, period=14):
+    prices = prices.reset_index(drop=True)  # integer index
+    delta = prices.diff()
+    gain = delta.clip(lower=0)
+    loss = -delta.clip(upper=0)
+    
+    # Initialize full-length Series
+    avg_gain = pd.Series(index=range(len(prices)), dtype=float)
+    avg_loss = pd.Series(index=range(len(prices)), dtype=float)
+    
+    # First average is simple rolling mean
+    avg_gain[period] = gain[:period+1].mean()
+    avg_loss[period] = loss[:period+1].mean()
+    
+    # Wilder smoothing
+    for i in range(period + 1, len(prices)):
+        avg_gain[i] = (avg_gain[i-1] * (period - 1) + gain[i]) / period
+        avg_loss[i] = (avg_loss[i-1] * (period - 1) + loss[i]) / period
 
-    # --- Inputs ---
-    search = st.text_input("Search ticker")
-    color_filter = st.selectbox(
-        "Filter by RSI Color",
-        ["All", "Light Green (RSI ≤ 30)", "Dark Green (30 < RSI < 40)", "Bright Red (RSI ≥ 70)"]
-    )
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    rsi = rsi.round(2)
+    return rsi
 
-    if st.button("🔄 Recalculate RSI"):
-        recalc = True
-    else:
-        recalc = False
+# -------------------------
+# Batch download function
+# -------------------------
+@st.cache_data(ttl=86400)
+def download_data_in_batches(tickers, batch_size=50):
+    all_data = pd.DataFrame()
+    for i in range(0, len(tickers), batch_size):
+        batch = tickers[i:i+batch_size]
+        try:
+            data = yf.download(batch, period="1y")["Close"]
+            all_data = pd.concat([all_data, data], axis=1)
+        except:
+            pass
+        time.sleep(1)
+    return all_data
 
-    @st.cache_data
-    def fetch_rsi(tickers):
-        results = []
-        for t in tickers:
-            try:
-                data = yf.download(t, period="6mo", progress=False)
-                if data.empty:
-                    continue
-                close = data["Close"]
-                rsi = talib.RSI(close, timeperiod=14)
-                latest_rsi = rsi.iloc[-1]
-                results.append((t, latest_rsi))
-            except Exception:
-                continue
-        return pd.DataFrame(results, columns=["Ticker", "RSI"])
+# -------------------------
+# RSI calculation function
+# -------------------------
+def calculate_rsi(data):
+    rsi_dict = {}
+    for ticker in data.columns:
+        prices = data[ticker].dropna()
+        if len(prices) >= 14:
+            rsi_series = wilder_rsi(prices)
+            rsi_dict[ticker] = round(rsi_series.iloc[-1], 2)
+        else:
+            rsi_dict[ticker] = None
+    rsi_table = pd.DataFrame(list(rsi_dict.items()), columns=["Ticker", "RSI"])
+    rsi_table["RSI"] = rsi_table["RSI"].round(2)
+        
+    def rsi_to_color(val):
+        if val is None:
+            return 'white'
+        elif val <= 30:
+            return "lightgreen"
+        elif val <= 40:
+            return "green"
+        elif val >= 70:
+            return "red"
+        else:
+            return "white"
+        
 
-    if recalc:
-        rsi_table = fetch_rsi(tickers)
+    rsi_table['Color'] = rsi_table['RSI'].apply(rsi_to_color)
+    return rsi_table
 
-        # Formatting RSI to 2 decimals without trailing zeros
-        rsi_table["RSI"] = rsi_table["RSI"].apply(lambda x: f"{x:.2f}".rstrip("0").rstrip("."))
+# -------------------------
+# Streamlit UI
+# -------------------------
+st.title("Stock RSI Dashboard")
 
-        # Color function
-        def highlight_rsi(val):
-            try:
-                v = float(val)
-                if v <= 30:
-                    return "background-color: lightgreen"
-                elif v < 40:
-                    return "background-color: green; color: white"
-                elif v >= 70:
-                    return "background-color: red; color: white"
-            except:
-                return ""
-            return ""
+# Download data (cached)
+data = download_data_in_batches(tickers)
 
-        styled = rsi_table.style.applymap(highlight_rsi, subset=["RSI"])
+# Refresh button
+if st.button("Refresh RSI"):
+    st.cache_data.clear()  # clear cache to get fresh data
+    data = download_data_in_batches(tickers)
 
-        # Search filter
-        if search:
-            styled = styled.loc[rsi_table["Ticker"].str.contains(search.upper(), na=False)]
+# Calculate RSI
+rsi_table = calculate_rsi(data)
 
-        # Color filter
-        if color_filter != "All":
-            if "Light Green" in color_filter:
-                styled = styled.loc[rsi_table["RSI"].astype(float) <= 30]
-            elif "Dark Green" in color_filter:
-                styled = styled.loc[(rsi_table["RSI"].astype(float) > 30) & (rsi_table["RSI"].astype(float) < 40)]
-            elif "Bright Red" in color_filter:
-                styled = styled.loc[rsi_table["RSI"].astype(float) >= 70]
+# Search box
+search = st.text_input("Search ticker:")
+if search:
+    filtered_table = rsi_table[rsi_table['Ticker'].str.contains(search.upper())]
+else:
+    filtered_table = rsi_table.copy()
 
-        st.dataframe(styled)
+# Color filter dropdown
+color_options = ["All", "lightgreen", "green", "red"]
+selected_color = st.selectbox("Filter by RSI color:", color_options)
+if selected_color != "All":
+    filtered_table = filtered_table[filtered_table['Color'] == selected_color]
 
-# =========================
-# MONTE CARLO SIMULATOR
-# =========================
-with tab2:
-    st.title("Monte Carlo Stock Simulator 🎲")
+# Display styled table
+def color_rsi(val):
+    return f'background-color: {val}'
 
-    class MonteCarloSimulator:
-        def __init__(self, experiment_fn, n_simulations=10000, random_seed=None):
-            self.experiment_fn = experiment_fn
-            self.n_simulations = n_simulations
-            if random_seed is not None:
-                np.random.seed(random_seed)
 
-        def run(self):
-            results = [self.experiment_fn() for _ in range(self.n_simulations)]
-            return np.array(results)
+rsi_table["RSI"] = rsi_table["RSI"].round(2)
+styled_table = filtered_table.style.applymap(color_rsi, subset=['Color'])
+st.dataframe(styled_table, height=600)
 
-        def summary(self, S0):
-            results = self.run()
-            prob_up = np.mean(results > S0) * 100
-            avg_return = np.mean(results / S0 - 1) * 100
-            return {
-                "percent_chance_up": prob_up,
-                "average_return_percent": avg_return
-            }
-
-    # User inputs
-    ticker = st.text_input("Enter ticker for simulation:", "AAPL")
-    n_simulations = st.slider("Number of simulations:", min_value=1000, max_value=50000, value=10000, step=1000)
-
-    horizon_option = st.selectbox(
-        "Time period:",
-        ["1 week", "1 month", "3 months", "6 months", "1 year"]
-    )
-
-    horizons = {
-        "1 week": 1/52,
-        "1 month": 1/12,
-        "3 months": 0.25,
-        "6 months": 0.5,
-        "1 year": 1.0
-    }
-    T = horizons[horizon_option]
-
-    if st.button("Run Simulation"):
-        with st.spinner("Fetching data and running simulations..."):
-            data = yf.download(ticker, period="1y", progress=False)
-            if data.empty:
-                st.error("Ticker not found or no data available!")
-            else:
-                S0 = float(data["Close"].iloc[-1])
-                returns = data["Close"].pct_change().dropna()
-                mu = float(returns.mean() * 252)
-                sigma = float(returns.std() * np.sqrt(252))
-
-                def stock_sim(T):
-                    Z = np.random.normal()
-                    return S0 * np.exp((mu - 0.5*sigma**2)*T + sigma*np.sqrt(T)*Z)
-
-                sim = MonteCarloSimulator(lambda: stock_sim(T), n_simulations)
-                result = sim.summary(S0)
-
-                st.success(f"Simulation complete for {ticker} over {horizon_option}!")
-                st.metric("Percent chance it goes up", f"{result['percent_chance_up']:.2f}%")
-                st.metric("Average return", f"{result['average_return_percent']:.2f}%")
