@@ -93,15 +93,15 @@ def calculate_rsi(data):
         
     def rsi_to_color(val):
         if val is None:
-            return 'white'
+            return 'white(40-70)'
         elif val <= 30:
-            return "lightgreen"
+            return "lightgreen(<30)"
         elif val <= 40:
-            return "green"
+            return "green(<40)"
         elif val >= 70:
-            return "red"
+            return "red(>70)"
         else:
-            return "white"
+            return "white(40-70)"
         
 
     rsi_table['Color'] = rsi_table['RSI'].apply(rsi_to_color)
