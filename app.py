@@ -7,32 +7,11 @@ import time
 # Hardcoded list of tickers
 # -------------------------
 tickers = [
+"AAPL","MSFT","NVDA","AMZN","GOOGL","GOOG","META","BRK.B","TSLA","AVGO","LLY","WMT","JPM","V","MA","XOM","UNH","COST","HD","ABBV","PG","ORCL","MRK","KO","CVX","PEP","BAC","TMO","ADBE","CRM","NFLX","AMD","LIN","ACN","CSCO","MCD","WFC","INTU","ABT","DHR","TXN","VZ","QCOM","CMCSA","AMGN","DIS","UPS","PM","NEE","LOW","HON","RTX","COP","IBM","INTC","SPGI","CAT","GE","GS","AXP","BLK","PFE","ISRG","NOW","AMAT","ELV","BKNG","MDT","DE","SYK","ADI","TJX","LMT","MO","CB","MMC","VRTX","ZTS","GILD","C","SCHW","TMUS","ADP","PLD","PNC","SO","DUK","REGN","TGT","USB","BSX","CME","AON","ICE","CI","ITW","MU","NKE","SHW","BDX","FIS","CL","EQIX","ETN","WM","APD","HCA","MCK","NSC","EMR","FDX","CSX","ECL","HUM","ORLY","SLB","ROP","MAR","PSA","DG","ADSK","COF","KMB","AEP","KMI","PGR","AFL","EXC","SRE","MSI","NXPI","ROST","PCAR","AIG","MPC","VLO","AZO","DLR","SPG","MSCI","ALL","JCI","PAYX","TRV","CTVA","FANG","HLT","MTB","WMB","WELL","TEL","OTIS","AMP","RCL","LEN","IDXX","KHC","OKE","GPN","CPRT","IQV","AME","ANET","FAST","CMI","ED","CTAS","EA","PRU","RSG","KEYS","ODFL","URI","PEG","ES","PCG","DOV","VRSK","IR","YUM","EXPD","LUV","EBAY","HIG","WEC","STT","GWW","NDAQ","TT","EFX","FICO","KMX","MLM","SW","NVR","BRO","ETR","GRMN","PPG","CINF","WAT","ZBRA","LNT","XYL","ROK","FITB","HUBB","PPL","EQR","AVB","HBAN","AEE","WRB","RF","DGX","CHD","SJM","CMS","NI","IP","NTRS","TSCO","L","DRI","HOLX","LDOS","SBAC","STE","EXR","STLD","FOXA","FOX","CFG","BXP","DTE","UAL","HST","NRG","PHM","FSLR","LULU","ALB","POOL","ENPH","COIN","SNOW","DDOG","NET","MDB","CRWD","ZS","OKTA","PANW","FTNT","TEAM","DOCU","HUBS","TWLO","SHOP","SQ","PYPL","ROKU","ABNB","UBER","LYFT","HOOD","RIVN","LCID","PLTR","AFRM","SOFI","DKNG","RBLX","CVNA","WBD","PARA","CHWY","BILL","ETSY","PINS","ZI","F","GM","STLA","RACE","NIO","INTU","CDNS","SNPS","KLAC","LRCX","TER","MPWR","MCHP","ON","SWKS","QRVO","COHR","ALGN","BIIB","ILMN","INCY","MRNA","BMRN","EXEL","ICLR","TECH","CRL","WST","A","BR","IEX","ERIE","MKTX","MAS","AVY","BLL","HAS","HRL","DPZ","CLX","SWK","IVZ","BEN","CF","MOS","APA","DVN","EOG","HAL","BKR","OXY","PSX","CTRA","SMCI","PFG","JBHT","GPC","TYL","AMCR","SNA","HPQ","LII","IFF","MKC","DD","EVRG","TRMB","PNR","FTV","ZBH","ESS","TTD","CDW","INVH","HII","TXT","J","MAA","LYB","COO","GEN","FFIV","NDSN","BALL","VTRS","DECK","NWSA","KIM","BBY","ALLE","GDDY","BLDR","JKHY","UDR","AKAM","EG","REG","RVTY","DOC","UHS","BF.B","CPT","WYNN","EPAM","AIZ","PNW","DAY","GL","FDS","AES","AOS","NCLH","ARE","MOH","TAP","MGM","GNRC","HSIC","FRT","PAYC","CAG","CPB","MTCH","DVA","LW",
 
-    "AAL","AAPL","ACHC","ADBE","AEHR","AEP","AMD","AMGN","AMTX","AMZN","ARCB","AVGO",
-    "BECN","BIDU","CAAS","CAKE","CASY","CHNR","CHPT","CMCSA","COST","CPRX","CSCO","CTSH",
-    "CZR","DBX","DJCO","DLTR","ETSY","FIZZ","FTNT","GBCI","GEG","GILD","GMAB","GOGO",
-    "GOOGL","GRPN","HAS","HBIO","HTLD","ILMN","INTC","IOSP","JBLU","KALU","KDP","LE","LQDA",
-    "LULU","LYFT","MANH","MAR","MAT","META","MIDD","MNST","MSEX","MSFT","MTCH","MYGN","NCTY",
-    "NTES","NTIC","NVDA","NXPI","ONB","ORLY","OZK","PCAR","PEP","PTON","PYPL","PZZA","QCOM",
-    "REGN","RGLD","ROCK","RTC","SBUX","SEDG","SEIC","SFIX","SFM","SIRI","SKYW","SOHU","SWBI",
-    "TROW","TSLA","TXN","TXRH","ULTA","URBN","USLM","UTSI","VEON","VRA","VRSK","WBA","WDFC",
-    "WEN","YORW","ABBV","ABT","AEO","AFL","ALL","AMC","AMN","ANET","ANF","APAM","APD","APTV",
-    "ASGN","ASH","AWK","AXP","AZO","BA","BABA","BAC","BAM","BAX","BBW","BBY","BCS","BEN","BILL",
-    "BLK","BMY","BNED","BP","BUD","BURL","BWA","BX","C","CAT","CCJ","CL","CLW","CMG","CNC",
-    "CNI","CP","CPB","CRH","CRM","CTVA","CVS","CVX","CYD","D","DAL","DB","DE","DEO","DFS","DG",
-    "DIS","DLR","DOC","DOW","DXC","EDR","EDU","EL","EMN","ENB","ET","EXR","F","FCN","FCX","FE",
-    "FICO","FL","FMC","FTS","GD","GE","GEO","GIS","GM","GMED","GRMN","GS","GSK","H","HD","HES",
-    "HMC","HOG","HRB","HSY","ICE","IMAX","IQV","IRM","JNJ","JPM","K","KEY","KKR","KMI","KMX",
-    "KO","KWR","L","LAC","LAZ","LCII","LMT","LOW","LUV","LVS","M","MA","MCD","MCK","MCO","MET",
-    "MKC","MOV","MRK","MS","MTB","NCLH","NFG","NGS","NKE","NOC","NOV","NTR","NVO","NVS","OKE",
-    "OPY","ORCL","PBH","PCG","PFE","PG","PKX","PLNT","PLOW","PNC","PRU","PSA","PSX","RBA",
-    "RCI","RF","RTX","SAP","SAVE","SCHW","SJW","SNA","SNOW","SO","SONY","SPOT","SRE","SUN",
-    "SYY","T","TAL","TAP","TCS","TEVA","TGT","THS","TJX","TM","TR","TREX","TRP","TSM","TSN",
-    "TU","TWI","TXT","UA","UBER","UBS","UGI","UL","UNFI","UNH","UPS","V","VEEV","VFC","VZ",
-    "WFC","WH","WHD","WMT","WNC","WSM","X","XOM","XRX","YUM","ZTO"
+"PENN","MARA","RIOT","CLSK","HUT","BITF","SDIG","WKHS","NKLA","MULN","PLUG","FCEL","BLNK","QS","OPEN","WISH","SNDL","TLRY","CGC","ACB","HEXO","BB","NOK","RIG","GME","AMC","KOSS","EXPR","BBBYQ","CVNA","FUBO","ROOT","UPST","CLOV","WOOF","SPCE","ASTS","RKLB","IONQ","QBTS","SOUN","BBAI","AI","PATH","APLD","CORZ","HIMS","LMND","OPFI","SOLO","TUP","BIG","DDS","SKLZ","BLUE","CRSP","EDIT","BEAM","PACB","RXRX","VERV","DNA","FATE","NTLA","SGMO","ACHR","JOBY","LILM","EVGO","CHPT","MVIS","LAZR","VLDR","INVZ","AEVA","OUST"
+
 ]
-
-# -------------------------
 # Wilder RSI function
 # -------------------------
 
