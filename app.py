@@ -141,6 +141,6 @@ def color_rsi(val):
 
 
 rsi_table["RSI"] = rsi_table["RSI"].round(2)
-styled_table = filtered_table.style.applymap(color_rsi, subset=['Color'])
+styled_table = filtered_table.style.map(color_rsi, subset=['Color'])
 st.dataframe(styled_table, height=600)
 
